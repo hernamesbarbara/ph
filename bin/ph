@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- 
+"""ph - command line for using ph to parse a phone number
+
+Usage:
+    ph PHONE [-c COUNTRY | -C COUNTRY_CODE]
+
+Arguments:
+    PHONE                                Text containing a phone number
+    -c --country COUNTRY                 Two character country abbreviation [default: US]
+    -C --country-code COUNTRY_CODE       Country specific numberic int'l dialing code 
+
+Options:
+    -h --help                            Help using ph
+
+Examples:
+    ph "(415) 305-1745" -c US
+
+"""
+import sys
+import os
+from docopt import docopt
+from ph.ph import find_dialing_code_from_alpha2
+from ph.ph import parse_phone, is_valid, find_alpha2_from_dialing_code
+import json
+
+def main(args):
+    numobj = parse_phone(args['PHONE'])
+    numobj['raw_input'] = args['PHONE']
+    error = numobj.pop('error')
+    if error:
+        errors = list(error['err_args'])
+    else:
+        errors = []
+    if args.get('--country-code'):
+        args['--country-code'] = int(args['--country-code'])
+        args['--country'] = find_alpha2_from_dialing_code(args['--country-code'])
+    invalid = not is_valid(numobj) or numobj.country_code != args['--country-code']
+    if invalid:
+        errors += ['invalid country code or region']
+    numobj['errors'] = errors
+    numobj['is_valid'] = len(numobj['errors']) == 0
+    json.dump(numobj, sys.stdout, indent=2, sort_keys=True)
+
+if __name__ == '__main__':
+    main(docopt(__doc__))
