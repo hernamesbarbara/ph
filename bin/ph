@@ -3,7 +3,7 @@
 """ph - command line for using ph to parse a phone number
 
 Usage:
-    ph PHONE [--country COUNTRY | --country-code COUNTRY_CODE] [-h]
+    ph [--country COUNTRY | --country-code COUNTRY_CODE] [-h] [PHONE]
 
 Arguments:
     PHONE                                 Text containing a phone number
@@ -11,21 +11,44 @@ Arguments:
     -k --country-code COUNTRY_CODE        Country specific numberic int'l dialing code [default: 0]
 
 Options:
-    -h --help                            Help using ph
+    -h --help                             Help using ph
 
 """
 
 import sys
 import os
-from docopt import docopt
+from docopt import docopt, DocoptExit
+import sys
+import os
 import json
+from ph.ph import parse_phone
+
+def read_stdin_or_timeout():
+    from select import select
+    """Try reading stdin. give up in 0.5s if nothing read yet."""
+    timeout = 0.1
+    rlist, _, _ = select([sys.stdin], [], [], timeout)
+    if rlist:
+        lines = [line.strip() for line in sys.stdin.readlines()]
+        return [line for line in lines if line]
+    else:
+        return []
 
 def main(args):
-    from ph.ph import parse_phone
-    from ph.ph import country_code_for_region
     code, country = args['--country-code'], args['--country']
     phone = parse_phone(args['PHONE'], int(code.strip()), country.upper().strip())
-    json.dump(phone, sys.stdout, indent=2, sort_keys=True)
+    return phone
 
 if __name__ == '__main__':
-    main(docopt(__doc__))
+    args = docopt(__doc__)
+    lines = read_stdin_or_timeout()
+    if not lines:
+        result = [main(args)]
+    else:
+        result = []
+        for line in lines:
+            args['PHONE'] = line
+            result.append(main(args))
+        
+    print(json.dumps(result, sys.stdout, indent=1, sort_keys=1))
+

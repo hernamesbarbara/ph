@@ -5,6 +5,7 @@
 from __future__ import print_function
 import sys
 import os
+import json
 from phonenumbers import normalize_digits_only, is_valid_number_for_region
 from phonenumbers import parse as parse_number
 from phonenumbers import country_code_for_region, region_code_for_country_code
@@ -42,4 +43,3 @@ def parse_phone(phone_str, country_code=0, alpha2=u"US"):
         phone_dict = {k: None for k in keys}
         phone_dict['phone_str'] = phone_str
     return phone_dict
-
