@@ -5,13 +5,10 @@
 from __future__ import print_function
 import sys
 import os
-from phonenumbers.phonenumber import PhoneNumber
-from phonenumbers.phonenumberutil import NumberParseException
 from phonenumbers import normalize_digits_only, is_valid_number_for_region
 from phonenumbers import parse as parse_number
 from phonenumbers import country_code_for_region, region_code_for_country_code
 import re
-import string
 
 COUNTRY_RG = re.compile(r"^(\+\d+)(.*)")
 

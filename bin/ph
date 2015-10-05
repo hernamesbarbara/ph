@@ -3,39 +3,29 @@
 """ph - command line for using ph to parse a phone number
 
 Usage:
-    ph PHONE [-c COUNTRY | -C COUNTRY_CODE]
+    ph PHONE [--country COUNTRY | --country-code COUNTRY_CODE] [-h]
 
 Arguments:
-    PHONE                                Text containing a phone number
-    -c --country COUNTRY                 Two character country abbreviation [default: US]
-    -C --country-code COUNTRY_CODE       Country specific numberic int'l dialing code [default: 0]
+    PHONE                                 Text containing a phone number
+    -c --country COUNTRY                  Two character country abbreviation [default: US]
+    -k --country-code COUNTRY_CODE        Country specific numberic int'l dialing code [default: 0]
 
 Options:
     -h --help                            Help using ph
 
-Examples:
-    ph "(555) 555-5555" -c "US"
-
 """
+
 import sys
 import os
 from docopt import docopt
-from ph.ph import find_dialing_code_from_alpha2
-from ph.ph import parse_phone, is_valid, find_alpha2_from_dialing_code, find_dialing_code_from_alpha2
 import json
 
 def main(args):
-    alpha2 = args['--country']
-    country_code = int(args['--country-code'])
-    if country_code == 0:
-        country_code = find_dialing_code_from_alpha2(alpha2)
-        if country_code == 0:
-            country_code = None
-            alpha2 = None
-    numobj = parse_phone(args['PHONE'], alpha2)
-
-    json.dump(numobj, sys.stdout, indent=2, sort_keys=True)
+    from ph.ph import parse_phone
+    from ph.ph import country_code_for_region
+    code, country = args['--country-code'], args['--country']
+    phone = parse_phone(args['PHONE'], int(code.strip()), country.upper().strip())
+    json.dump(phone, sys.stdout, indent=2, sort_keys=True)
 
 if __name__ == '__main__':
     main(docopt(__doc__))
-    # print(docopt(__doc__))
