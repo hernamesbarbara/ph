@@ -13,7 +13,7 @@ config = {
     'keywords': 'wrapper for phonenumbers (https://github.com/daviddrysdale/python-phonenumbers.git)',
     'author_email': 'a@yhathq.com',
     'version': '0.1',
-    'install_requires': ['phonenumbers', 'pycountry'],
+    'install_requires': ['phonenumbers'],
     'packages': ['ph'],
     'include_package_data': True,
     'scripts': ['bin/ph'],

@@ -8,39 +8,34 @@ Usage:
 Arguments:
     PHONE                                Text containing a phone number
     -c --country COUNTRY                 Two character country abbreviation [default: US]
-    -C --country-code COUNTRY_CODE       Country specific numberic int'l dialing code 
+    -C --country-code COUNTRY_CODE       Country specific numberic int'l dialing code [default: 0]
 
 Options:
     -h --help                            Help using ph
 
 Examples:
-    ph "(415) 305-1745" -c US
+    ph "(555) 555-5555" -c "US"
 
 """
 import sys
 import os
 from docopt import docopt
 from ph.ph import find_dialing_code_from_alpha2
-from ph.ph import parse_phone, is_valid, find_alpha2_from_dialing_code
+from ph.ph import parse_phone, is_valid, find_alpha2_from_dialing_code, find_dialing_code_from_alpha2
 import json
 
 def main(args):
-    numobj = parse_phone(args['PHONE'])
-    numobj['raw_input'] = args['PHONE']
-    error = numobj.pop('error')
-    if error:
-        errors = list(error['err_args'])
-    else:
-        errors = []
-    if args.get('--country-code'):
-        args['--country-code'] = int(args['--country-code'])
-        args['--country'] = find_alpha2_from_dialing_code(args['--country-code'])
-    invalid = not is_valid(numobj) or numobj.country_code != args['--country-code']
-    if invalid:
-        errors += ['invalid country code or region']
-    numobj['errors'] = errors
-    numobj['is_valid'] = len(numobj['errors']) == 0
+    alpha2 = args['--country']
+    country_code = int(args['--country-code'])
+    if country_code == 0:
+        country_code = find_dialing_code_from_alpha2(alpha2)
+        if country_code == 0:
+            country_code = None
+            alpha2 = None
+    numobj = parse_phone(args['PHONE'], alpha2)
+
     json.dump(numobj, sys.stdout, indent=2, sort_keys=True)
 
 if __name__ == '__main__':
     main(docopt(__doc__))
+    # print(docopt(__doc__))
